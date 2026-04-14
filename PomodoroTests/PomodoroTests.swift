@@ -10,10 +10,42 @@ import Testing
 
 struct PomodoroTests {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-        // Swift Testing Documentation
-        // https://developer.apple.com/documentation/testing
+    @Test func completesFullPomodoroCycleInOrder() {
+        let model = PomodoroModel()
+        model.focusTime = 25
+        model.shortBreakTime = 5
+        model.longBreakTime = 15
+        model.timeRemaining = model.focusTime
+
+        let expectedSequence = [
+            ("Descanso Corto", 5, false, 0),
+            ("Enfoque", 25, true, 1),
+            ("Descanso Corto", 5, false, 1),
+            ("Enfoque", 25, true, 2),
+            ("Descanso Corto", 5, false, 2),
+            ("Enfoque", 25, true, 3),
+            ("Descanso Largo", 15, false, 3),
+            ("Enfoque", 25, true, 0),
+        ]
+
+        for expected in expectedSequence {
+            model.completeCurrentSession()
+
+            #expect(model.sessionTitle == expected.0)
+            #expect(model.timeRemaining == expected.1)
+            #expect(model.isFocusSession == expected.2)
+            #expect(model.focusSessionsCompleted == expected.3)
+        }
+    }
+
+    @Test func manualSkipKeepsTimerRunningWhenAlreadyRunning() {
+        let model = PomodoroModel()
+        model.isRunning = true
+
+        model.skipToNext()
+
+        #expect(model.isRunning)
+        model.pauseTimer()
     }
 
 }
